@@ -53,7 +53,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li><a href="#etat-art">État de l'art</a></li>
         <li><a href="#ia-en-bref">IA en bref</a></li>
-        <li><a href="#theorie-musicale">Théorie musicale</a></li>
+        <li><a href="#application">Application</a></li>
         <li><a href="#conclusion">Regard critique</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
@@ -278,10 +278,10 @@
             </div>    
         </div>
 
-        <div class="container c-content" id="theorie-musicale">
-            <h1>Théorie musicale et mathématisation</h1>
+        <div class="container c-content" id="application">
+            <h1>Application grâce au format MIDI</h1>
             <p>
-                Nous allons rapidement aborder, dans cette partie, de la théorie musicale et en particulier de l'utilisation du format MIDI dans le cas de génération de musique.
+                Nous allons rapidement aborder, dans cette partie, comment créer un réseau de neurones pour générer de la musique en parlant un peu de théorie musicale et de l'utilisation du format MIDI.
             </p>
             <div class="col-md-6">
                 <h2>Théorie musicale</h2>
@@ -311,19 +311,62 @@
 
             </div>
             <div class="col-md-6">
-                <h2>Le format MIDI</h2>
+                <h2>Le format MIDI<sup><a href="#ref11">[11]</a></sup></h2>
                 <p>
                     Le format MIDI est en quelque sorte à la musique ce que l'écriture est au discours. C'est un format exclusivement destiné à la musique mais qui ne contient pas de l'audio comme tel. Lorsqu'on enregistre sa voix, on a souvent un fichier MP3 en sortie qu'il est quasiment impossible de modifier. Le format MIDI, qui est d'ailleurs plus un <b>protocole</b>, est un ensemble de règles et nécessite un <b>synthétiseur</b> pour en faire ressortir la musique.
                 </p>
                 <p>
-                    Chaque fichier MIDI est un ensemble de <b>tracks</b> qui contiennent des <b>événements</b>. Les tracks peuvent être différents instruments ou rien que main droite/main gauche sur le piano par exemple. Les événements sont des descriptions d'appui sur une note ou de levée, de tempo, du type d'instrument etc soit n'importe quelle information d'intérêt pour la partition. À chaque événement est relié un numéro de <b>tick</b> qui permet de positionner l'événement dans le temps puisqu'il s'agit de la plus petite résolution temporelle.
+                    Chaque fichier MIDI est un ensemble de <b>tracks</b> qui contiennent des <b>événements</b>. Les tracks peuvent être différents instruments ou rien que main droite/main gauche sur le piano par exemple. Les événements sont composés de deux informations à chaque fois : une information sur le <b>temps</b> (MIDI time) et une information sur le <b>message</b> (MIDI message).
+                        <ul>
+                            <li>
+                                MIDI time: la plus petite notion de temps est nommée <b>tick</b>. Donc l'information qu'on passe ici est plutôt un delta de temps et désigne combien de ticks on doit attendre avant de jouer le prochain message.
+                            </li>
+                        </ul>
+                        <figure>
+                            <img src="images/midi.jpg" alt="Détail découpage temporel MIDI" width="500" />
+                            <figcaption>Détails sur le découpage temporel du format MIDI (<a href="https://pdfs.semanticscholar.org/6d50/71756fe4c304981656cb1be9be7f5611ac53.pdf">Hilscher M.</a>)</figcaption>
+                        </figure>
+                        <ul>
+                            <li>
+                                MIDI message: le message contient une description de n'importe quelle information pour la partition, appui sur une note ou de levée, le type d'instrument etc
+                            </li>
+                        </ul>
                 </p>
-                <figure>
-                    <img src="images/midi.jpg" alt="Détail découpage temporel MIDI" width="500" />
-                    <figcaption>Détails sur le découpage temporel du format MIDI(<a href="https://pdfs.semanticscholar.org/6d50/71756fe4c304981656cb1be9be7f5611ac53.pdf"> M. Hilscher</a>)</figcaption>
-                </figure>
+                <h3><b>Message MIDI</b></h3>
+                <p>
+                    Le message MIDI commence par une commande qui est suivie par de la donnée supplémentaire au besoin. Par conséquent, tous les messages ne font pas la même longueur. La commande la plus utilisée est <i>note-on</i> et <i>note-off</i> qui signalent le début d'une nouvelle note ou sa fin. Ces commandes sont essentielles, d'autant plus quand il s'agit d'une <b>polyphonie</b> (plusieurs notes jouées en même temps contrairement à une monophonie) puisqu'il faut explicitement signalé quelle note s'arrête ou laquelle continue.
+                </p>
+                <p>
+                    Vous pouvez observer à quoi ressemble ce format via ce <a href="https://yellow-ray.de/~moritz/midi_rnn/examples.html"> lien </a>, qui regroupe des extraits de Mozart mis en forme pour un réseau de neurones particulier.
+                </p>
+
 
             </div>
+            <div class="clearfix"></div>
+            <div>
+                <h2>Exemple d'application avec un réseau de neurones récurrents <sup><a href="#ref12">[12]</a></sup></h2> 
+                
+                <h3><b>Pré-traitement et entraînement</b></h3>
+                <p>
+                    Une grande partie du travail pour générer de la musique par un RNN ou pour n'importe quel projet de Machine Learning est le <b>prétraitement des données</b>. En effet, ce qu'on va obtenir va énormément dépendre de l'entrée. Par exemple, si on entraîne un réseau avec uniquement des extraits de musique classique, alors le réseau sera très bon dans ce style mais pas du tout pour générer des extraits de rock.
+                </p>
+                <p>
+                    Par conséquent, on peut par exemple choisir de ne travailler que sur l'enchaînement de notes : on ne tient pas compte du rythme mais on cherche seulement à prédire la prochaine note d'une "phrase musicale" comme on prédirait le prochain mot d'une phrase classique.
+                </p>
+                <p>
+                    Donc on a nos extraits musicaux que l'on sépare en une base dite d'<i>entraînement</i> et une de <i>test</i> qui permettent d'ajuster le modèle. On choisit une longueur <i>l</i> qui correspondra à la longueur des phrases utilisées. Donc il faut imaginer une fenêtre de longueur <i>l</i> qui se déplace le long des extraits pour créer les phrases et le modèle tente de prédire la prochaine note.
+                </p>
+                <figure>
+                    <img src="images/model.png" alt="Ex modèle RNN" width="350" />
+                    <figcaption>Exemple d'un modèle RNN avec une fenêtre glissante (<a href="https://pdfs.semanticscholar.org/6d50/71756fe4c304981656cb1be9be7f5611ac53.pdf">Hilscher M.</a>)</figcaption>
+                </figure>
+
+                <h3><b>Utilisation</b></h3>
+                <p>
+                    Disons que notre modèle est entraîné et on souhaite l'utiliser. Alors on va lui fournir une phrase dite "d'échauffement" qui représente les phrases avec lesquelles il était entraîné. C'est là que survient l'intérêt de travailler avec un réseau de neurones récurrents: la note prédite ne dépend pas que de la note précédente mais de tout l'enchaînement de notes dans la phrase. Par conséquent, quand on parle d'échauffement on veut seulement désigner le fait d'annoncer le genre de musique souhaité.
+                </p>
+            </div>
+
 
                 
         </div>
@@ -331,7 +374,27 @@
         <div class="c-gray">
             <div class="container c-content" id="conclusion">
                 <h1>Danger ou opportunité ?</h1>
-
+                <p>
+                    Comme dit en introduction, ce sujet fait souvent un peu froid dans le dos: si les ordinateurs deviennent assez puissants pour générer de la musique, quelle limite fixons-nous entre l'Homme et la machine si ce n'est plus la créativité ?
+                </p>
+                <p>
+                    Normalement après cette veille et les résultats exposés, les plus sceptiques devraient être un peu rassurés: ce qu'on appelle intelligences artificielles ne sont pas encore capable de générer de la musique sans la main de l'Homme. 
+                    <ul>
+                        <li>
+                            Les modèles sont longs à construire et nécessitent beaucoup d'ajustements manuels
+                        </li>
+                        <li>
+                            Les données fournies en entrée sont fournies par la main humaine suite à un tri et un pré-traitement
+                        </li>
+                        <li>
+                            Beaucoup de projets qui se vendent comme étant "<i>composés par une IA</i>" ont en effet une part où une intelligence artificielle a participé mais ont souvent nécessité un arrangement humain, que ce soit pour l'écriture des paroles ou pour le mixage final.
+                        </li>
+                    </ul>
+                </p>
+                <p>
+                    De nombreux artistes y voient une énorme opportunité comme par exemple Taryn Southern présentée en première partie qui est seulement chanteuse mais aimerait avoir main mise sur ses productions. Tout comme l'art en général est toujours exploré sous toutes ses formes, la musique a le même comportement. L'arrivée des synthétiseurs avaient révolutionné la musique mais n'a jamais remplacé l'Homme, il a toujours été seulement un outil pour prolonger la créativité humaine.
+                </p>
+        
             </div>
         </div>
 
@@ -349,7 +412,6 @@
         </div>
         -->
         <div class="container" id="refs">
-            <div class="col-md-8">
             <h1>Références</h1>
             <ul class="list-unstyled">
                 <li id="ref1">[1] IGN. Al Alcorn Interview (2008). <a href="https://www.ign.com/articles/2008/03/11/al-alcorn-interview">https://www.ign.com/articles/2008/03/11/al-alcorn-interview .</a></li>
@@ -362,8 +424,9 @@
                 <li id="ref8">[8] Global News Wire. Amper (2019) <a href="https://www.globenewswire.com/news-release/2019/01/23/1704214/0/en/Amper-Music-Launches-First-AI-Music-Composition-Platform-for-Enterprise-Content-Creators.html">https://www.globenewswire.com/news-release/2019/01/23/1704214/0/en/Amper-Music-Launches-First-AI-Music-Composition-Platform-for-Enterprise-Content-Creators.html</a>
                 <li id="ref9">[9] BoTree, Differences between Machine Learning et Deep Learning <a href="https://mc.ai/decoding-the-differences-between-machine-learning-deep-learning/">https://mc.ai/decoding-the-differences-between-machine-learning-deep-learning/</a>
                 <li id="ref10">[10] Anna Chaney, The Watson Beat (2018) <a href="https://medium.com/@anna_seg/the-watson-beat-d7497406a202"> https://medium.com/@anna_seg/the-watson-beat-d7497406a202</a>
+                <li id="ref11">[11] H. M. de Oliveira, R. C. de Oliveira, Understanding MIDI: A painless tutorial on midi format <a href="https://www.researchgate.net/publication/316955785_Understanding_MIDI_A_Painless_Tutorial_on_Midi_Format">https://www.researchgate.net/publication/316955785_Understanding_MIDI_A_Painless_Tutorial_on_Midi_Format</a>
+                <li id="ref12">[12] Hilscher M., Shahroudi N., Music Generation for MIDI datasets <a href="https://pdfs.semanticscholar.org/6d50/71756fe4c304981656cb1be9be7f5611ac53.pdf">https://pdfs.semanticscholar.org/6d50/71756fe4c304981656cb1be9be7f5611ac53.pdf</a>
 
-            </div>
         </div>
     </body>
 </html>
