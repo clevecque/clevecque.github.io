@@ -297,7 +297,7 @@
                 </p>
                 <figure>
                     <img src="images/gamme_de_bach.gif" alt="Explication de la gamme" width="500" />
-                    <figcaption>Description de la gamme selon Bach </figcaption>
+                    <figcaption>Description de la gamme selon Bach (<a href="http://wiki.scienceamusante.net/index.php/Les_tiges_musicales"> Wiki Science Amusante</a>)</figcaption>
                 </figure>
                 <p>
                     Maintenant, construisons la gamme comme on la connaît en Europe, communément appelée <b>gamme tempérée</b> (d'autres gammes existent en Asie par exemple). Les grecs considéraient que seuls la quinte et l'octave étaient <b>consonantes</b>. Par conséquent on va construire toute la gamme à partir de quintes et d'octaves. Choisissons une note de fréquence <i>f</i> (disons qu'il s'agit d'un do), une quinte au dessus on retrouve sol et un octave au-dessus, un autre do de fréquence 2<i>f</i>. La note située une quinte au dessus du sol est un ré de fréquence 9/4<i>f</i>, ce qui est donc au-dessus de 2<i>f</i>, on va donc soustraire une octave et on arrive au ré de fréquence 9/8<i>f</i>. Et on va construire toutes les notes de la gamme de cette façon, seulement à partir de quintes et d'octaves.
@@ -312,6 +312,16 @@
             </div>
             <div class="col-md-6">
                 <h2>Le format MIDI</h2>
+                <p>
+                    Le format MIDI est en quelque sorte à la musique ce que l'écriture est au discours. C'est un format exclusivement destiné à la musique mais qui ne contient pas de l'audio comme tel. Lorsqu'on enregistre sa voix, on a souvent un fichier MP3 en sortie qu'il est quasiment impossible de modifier. Le format MIDI, qui est d'ailleurs plus un <b>protocole</b>, est un ensemble de règles et nécessite un <b>synthétiseur</b> pour en faire ressortir la musique.
+                </p>
+                <p>
+                    Chaque fichier MIDI est un ensemble de <b>tracks</b> qui contiennent des <b>événements</b>. Les tracks peuvent être différents instruments ou rien que main droite/main gauche sur le piano par exemple. Les événements sont des descriptions d'appui sur une note ou de levée, de tempo, du type d'instrument etc soit n'importe quelle information d'intérêt pour la partition. À chaque événement est relié un numéro de <b>tick</b> qui permet de positionner l'événement dans le temps puisqu'il s'agit de la plus petite résolution temporelle.
+                </p>
+                <figure>
+                    <img src="images/midi.jpg" alt="Détail découpage temporel MIDI" width="500" />
+                    <figcaption>Détails sur le découpage temporel du format MIDI(<a href="https://pdfs.semanticscholar.org/6d50/71756fe4c304981656cb1be9be7f5611ac53.pdf"> M. Hilscher</a>)</figcaption>
+                </figure>
 
             </div>
 
